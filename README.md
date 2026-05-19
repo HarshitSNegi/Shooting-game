@@ -1,2 +1,2 @@
 # Shooting-game
-This is my first repository.
+ A game that I've created ( btw this is my first repository.)
