@@ -1,0 +1,148 @@
+!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Star Hunter</title>
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial, Helvetica, sans-serif;
+}
+
+body{
+    overflow:hidden;
+    background:black;
+    color:white;
+}
+
+canvas{
+    background:black;
+    display:none;
+    cursor:none;
+}
+
+#menu{
+    position:absolute;
+    inset:0;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    flex-direction:column;
+    gap:20px;
+    background:black;
+    z-index:20;
+}
+
+#menu h1{
+    font-size:4rem;
+    letter-spacing:5px;
+}
+
+input{
+    padding:14px;
+    width:260px;
+    border:none;
+    border-radius:10px;
+    outline:none;
+    text-align:center;
+    font-size:1rem;
+}
+
+button{
+    padding:12px 30px;
+    border:none;
+    border-radius:10px;
+    font-size:1rem;
+    cursor:pointer;
+    font-weight:bold;
+}
+
+#hud{
+    position:absolute;
+    top:15px;
+    left:15px;
+    font-size:22px;
+    display:none;
+    z-index:5;
+}
+
+#hearts{
+    position:absolute;
+    top:15px;
+    left:180px;
+    font-size:28px;
+    display:none;
+    z-index:5;
+}
+
+#leaderboard{
+    position:absolute;
+    top:15px;
+    right:15px;
+    width:260px;
+    background:rgba(255,255,255,0.08);
+    border:1px solid rgba(255,255,255,0.15);
+    padding:18px;
+    border-radius:14px;
+    backdrop-filter: blur(10px);
+    display:none;
+    z-index:5;
+}
+
+#leaderboard h2{
+    text-align:center;
+    margin-bottom:12px;
+}
+
+#leaderboard ol{
+    padding-left:22px;
+    line-height:1.9;
+}
+
+#gameOver{
+    position:absolute;
+    inset:0;
+    background:rgba(0,0,0,0.92);
+    display:none;
+    justify-content:center;
+    align-items:center;
+    flex-direction:column;
+    gap:20px;
+    z-index:30;
+}
+
+#gameOver h1{
+    color:red;
+    font-size:4rem;
+}
+
+</style>
+</head>
+<body>
+
+<div id="menu">
+
+    <h1>STAR HUNTER</h1>
+
+    <input type="text"
+    id="playerName"
+    placeholder="Enter your name">
+
+    <button id="startBtn">
+        START GAME
+    </button>
+
+</div>
+
+<div id="hud">
+    Score: <span id="score">0</span>
+</div>
+
+<div id="hearts">
+    ❤️ ❤️ ❤️
+</div>
