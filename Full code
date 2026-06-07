@@ -1,0 +1,666 @@
+```html id="x0v9rp"
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Star Hunter</title>
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial, Helvetica, sans-serif;
+}
+
+body{
+    overflow:hidden;
+    background:black;
+    color:white;
+}
+
+canvas{
+    background:black;
+    display:none;
+    cursor:none;
+}
+
+#menu{
+    position:absolute;
+    inset:0;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    flex-direction:column;
+    gap:20px;
+    background:black;
+    z-index:20;
+}
+
+#menu h1{
+    font-size:4rem;
+    letter-spacing:5px;
+}
+
+input{
+    padding:14px;
+    width:260px;
+    border:none;
+    border-radius:10px;
+    outline:none;
+    text-align:center;
+    font-size:1rem;
+}
+
+button{
+    padding:12px 30px;
+    border:none;
+    border-radius:10px;
+    font-size:1rem;
+    cursor:pointer;
+    font-weight:bold;
+}
+
+#hud{
+    position:absolute;
+    top:15px;
+    left:15px;
+    font-size:22px;
+    display:none;
+    z-index:5;
+}
+
+#hearts{
+    position:absolute;
+    top:15px;
+    left:180px;
+    font-size:28px;
+    display:none;
+    z-index:5;
+}
+
+#leaderboard{
+    position:absolute;
+    top:15px;
+    right:15px;
+    width:260px;
+    background:rgba(255,255,255,0.08);
+    border:1px solid rgba(255,255,255,0.15);
+    padding:18px;
+    border-radius:14px;
+    backdrop-filter: blur(10px);
+    display:none;
+    z-index:5;
+}
+
+#leaderboard h2{
+    text-align:center;
+    margin-bottom:12px;
+}
+
+#leaderboard ol{
+    padding-left:22px;
+    line-height:1.9;
+}
+
+#gameOver{
+    position:absolute;
+    inset:0;
+    background:rgba(0,0,0,0.92);
+    display:none;
+    justify-content:center;
+    align-items:center;
+    flex-direction:column;
+    gap:20px;
+    z-index:30;
+}
+
+#gameOver h1{
+    color:red;
+    font-size:4rem;
+}
+
+</style>
+</head>
+<body>
+
+<div id="menu">
+
+    <h1>STAR HUNTER</h1>
+
+    <input type="text"
+    id="playerName"
+    placeholder="Enter your name">
+
+    <button id="startBtn">
+        START GAME
+    </button>
+
+</div>
+
+<div id="hud">
+    Score: <span id="score">0</span>
+</div>
+
+<div id="hearts">
+    ❤️ ❤️ ❤️
+</div>
+
+<div id="leaderboard">
+
+    <h2>🏆 Rankings</h2>
+
+    <ol id="rankingList"></ol>
+
+</div>
+
+<div id="gameOver">
+
+    <h1>GAME OVER</h1>
+
+    <div id="finalText"></div>
+
+    <button onclick="location.reload()">
+        Play Again
+    </button>
+
+</div>
+
+<canvas id="game"></canvas>
+
+<script>
+
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+
+canvas.width = innerWidth;
+canvas.height = innerHeight;
+
+let running = false;
+let score = 0;
+let playerName = "";
+let lives = 3;
+
+const rocket = {
+
+    x: canvas.width / 2,
+    y: canvas.height - 90
+};
+
+let missiles = [];
+let stars = [];
+
+const scoreEl = document.getElementById("score");
+const rankingList = document.getElementById("rankingList");
+const heartsEl = document.getElementById("hearts");
+
+document.getElementById("startBtn").onclick = () => {
+
+    const name = document
+        .getElementById("playerName")
+        .value
+        .trim();
+
+    if(name.length < 2){
+
+        alert("Please enter your name");
+        return;
+    }
+
+    playerName = name;
+
+    document.getElementById("menu").style.display = "none";
+
+    document.getElementById("hud").style.display = "block";
+
+    document.getElementById("leaderboard").style.display = "block";
+
+    document.getElementById("hearts").style.display = "block";
+
+    canvas.style.display = "block";
+
+    running = true;
+
+    updateLeaderboard();
+
+    startShooting();
+
+    spawnStars();
+
+    animate();
+};
+
+window.addEventListener("mousemove",(e)=>{
+
+    rocket.x = e.clientX;
+});
+
+function startShooting(){
+
+    setInterval(()=>{
+
+        if(!running) return;
+
+        missiles.push({
+
+            x: rocket.x,
+            y: rocket.y - 55,
+
+            // VERY FAST MISSILES
+            speed: 18
+
+        });
+
+    },700);
+}
+
+function spawnStars(){
+
+    setInterval(()=>{
+
+        if(!running) return;
+
+        stars.push({
+
+            x: Math.random() * canvas.width,
+            y: -30,
+            radius: 22,
+
+            // slightly faster stars
+            speed: 1.35
+
+        });
+
+    },650);
+}
+
+function updateHearts(){
+
+    let hearts = "";
+
+    for(let i=0;i<lives;i++){
+
+        hearts += "❤️ ";
+    }
+
+    heartsEl.innerHTML = hearts;
+}
+
+function drawBackground(){
+
+    for(let i=0;i<100;i++){
+
+        ctx.fillStyle = "rgba(255,255,255,0.15)";
+
+        ctx.beginPath();
+
+        ctx.arc(
+
+            Math.random()*canvas.width,
+            Math.random()*canvas.height,
+            Math.random()*2,
+            0,
+            Math.PI*2
+
+        );
+
+        ctx.fill();
+    }
+}
+
+function drawRocket(){
+
+    ctx.fillStyle = "white";
+
+    // launcher body
+    ctx.fillRect(
+
+        rocket.x - 10,
+        rocket.y - 65,
+        20,
+        65
+
+    );
+
+    // lower base
+    ctx.beginPath();
+
+    ctx.moveTo(rocket.x - 28, rocket.y + 15);
+
+    ctx.lineTo(rocket.x + 28, rocket.y + 15);
+
+    ctx.lineTo(rocket.x, rocket.y - 15);
+
+    ctx.closePath();
+
+    ctx.fill();
+}
+
+function drawMissiles(){
+
+    missiles.forEach((m,mIndex)=>{
+
+        // red missile
+        ctx.fillStyle = "red";
+
+        ctx.beginPath();
+
+        ctx.roundRect(
+
+            m.x - 4,
+            m.y,
+            8,
+            26,
+            5
+
+        );
+
+        ctx.fill();
+
+        // animated flame
+        let flameSize = Math.random()*18 + 12;
+
+        let grad = ctx.createLinearGradient(
+
+            m.x,
+            m.y + 26,
+            m.x,
+            m.y + 26 + flameSize
+
+        );
+
+        grad.addColorStop(0,"cyan");
+
+        grad.addColorStop(1,"blue");
+
+        ctx.fillStyle = grad;
+
+        ctx.beginPath();
+
+        ctx.moveTo(
+
+            m.x,
+            m.y + 26 + flameSize
+
+        );
+
+        ctx.lineTo(
+
+            m.x - 8,
+            m.y + 26
+
+        );
+
+        ctx.lineTo(
+
+            m.x + 8,
+            m.y + 26
+
+        );
+
+        ctx.closePath();
+
+        ctx.fill();
+
+        // FAST MOVEMENT
+        m.y -= m.speed;
+
+        // remove only after fully leaving screen
+        if(m.y < -200){
+
+            missiles.splice(mIndex,1);
+        }
+    });
+}
+
+function drawStars(){
+
+    stars.forEach((s,sIndex)=>{
+
+        ctx.shadowBlur = 40;
+
+        ctx.shadowColor = "white";
+
+        let gradient = ctx.createRadialGradient(
+
+            s.x,
+            s.y,
+            2,
+
+            s.x,
+            s.y,
+            s.radius
+
+        );
+
+        gradient.addColorStop(0,"white");
+
+        gradient.addColorStop(0.4,"#dddddd");
+
+        gradient.addColorStop(1,"rgba(255,255,255,0.1)");
+
+        ctx.fillStyle = gradient;
+
+        ctx.beginPath();
+
+        ctx.arc(
+
+            s.x,
+            s.y,
+            s.radius,
+            0,
+            Math.PI*2
+
+        );
+
+        ctx.fill();
+
+        ctx.shadowBlur = 0;
+
+        s.y += s.speed;
+
+        // collision
+        missiles.forEach((m,mIndex)=>{
+
+            let dx = s.x - m.x;
+
+            let dy = s.y - m.y;
+
+            let dist = Math.sqrt(dx*dx + dy*dy);
+
+            if(dist < s.radius + 10){
+
+                stars.splice(sIndex,1);
+
+                missiles.splice(mIndex,1);
+
+                score += 10;
+
+                scoreEl.innerText = score;
+
+                saveScore();
+            }
+        });
+
+        // lose life
+        if(s.y > canvas.height){
+
+            stars.splice(sIndex,1);
+
+            lives--;
+
+            updateHearts();
+
+            if(lives <= 0){
+
+                endGame();
+            }
+        }
+    });
+}
+
+function saveScore(){
+
+    let ranks = JSON.parse(
+
+        localStorage.getItem("spaceRanks")
+
+    ) || [];
+
+    let existing = ranks.find(
+
+        r => r.name === playerName
+
+    );
+
+    if(existing){
+
+        if(score > existing.score){
+
+            existing.score = score;
+        }
+
+    } else {
+
+        ranks.push({
+
+            name: playerName,
+            score: score
+        });
+    }
+
+    ranks.sort((a,b)=>b.score-a.score);
+
+    localStorage.setItem(
+
+        "spaceRanks",
+        JSON.stringify(ranks)
+
+    );
+
+    updateLeaderboard();
+}
+
+function updateLeaderboard(){
+
+    let ranks = JSON.parse(
+
+        localStorage.getItem("spaceRanks")
+
+    ) || [];
+
+    rankingList.innerHTML = "";
+
+    ranks.slice(0,5).forEach((r)=>{
+
+        let li = document.createElement("li");
+
+        li.innerHTML = `${r.name} — ${r.score}`;
+
+        rankingList.appendChild(li);
+    });
+}
+
+function endGame(){
+
+    running = false;
+
+    let ranks = JSON.parse(
+
+        localStorage.getItem("spaceRanks")
+
+    ) || [];
+
+    let topPlayers = "";
+
+    ranks.slice(0,5).forEach((r,index)=>{
+
+        topPlayers += `
+
+            <div style="
+                margin:10px 0;
+                font-size:20px;
+            ">
+                #${index+1}
+                ${r.name}
+                — ${r.score}
+            </div>
+        `;
+    });
+
+    document.getElementById("gameOver")
+    .style.display = "flex";
+
+    document.getElementById("finalText")
+    .innerHTML = `
+
+        <div style="
+            font-size:30px;
+            margin-bottom:20px;
+        ">
+
+            ${playerName},
+            your score was
+            <b>${score}</b>
+
+        </div>
+
+        <div style="
+            width:360px;
+            padding:22px;
+            border-radius:16px;
+            background:rgba(255,255,255,0.05);
+            border:1px solid rgba(255,255,255,0.15);
+        ">
+
+            <h2 style="
+                margin-bottom:16px;
+            ">
+                🏆 Leaderboard
+            </h2>
+
+            ${topPlayers}
+
+        </div>
+    `;
+}
+
+function animate(){
+
+    if(!running) return;
+
+    ctx.clearRect(
+
+        0,
+        0,
+        canvas.width,
+        canvas.height
+
+    );
+
+    drawBackground();
+
+    drawRocket();
+
+    drawMissiles();
+
+    drawStars();
+
+    requestAnimationFrame(animate);
+}
+
+window.addEventListener("resize",()=>{
+
+    canvas.width = innerWidth;
+    canvas.height = innerHeight;
+});
+
+updateHearts();
+
+</script>
+
+</body>
+</html>
+```
